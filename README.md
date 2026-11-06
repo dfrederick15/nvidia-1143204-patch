@@ -67,3 +67,16 @@ trixie, sid, experimental, or backports fixes it.
 
 Verified building and running on Debian 13 (trixie), driver 550.163.01,
 RTX 3060 Laptop, kernels 6.12.105 and 6.12.107.
+
+## Automatic patching (DKMS hook)
+
+`sudo ./install-hook.sh` installs a DKMS `PRE_BUILD` hook
+(`/etc/dkms/nvidia-current-open.conf` → `/usr/local/sbin/nvidia-1143204-prebuild`).
+DKMS then patches its private build copy before every nvidia-current-open build,
+so new kernels and nvidia package upgrades both build without running
+`apply.sh` by hand. `/usr/src` is not modified. The hook does nothing if the source
+already contains the fix. If the patch no longer applies, it warns and builds
+unpatched.
+
+Remove `/etc/dkms/nvidia-current-open.conf` once a fixed nvidia-open-kernel-dkms
+reaches trixie. The fix is in sid as nvidia-open-gpu-kernel-modules 550.163.01-4.1.

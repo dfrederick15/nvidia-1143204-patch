@@ -1,0 +1,17 @@
+#!/bin/sh
+# DKMS PRE_BUILD hook for Debian #1143204 (nvidia open DKMS vs pci_resize_resource).
+# DKMS runs this inside its private copy of the module source (the build dir),
+# so /usr/src is never modified. It patches if needed and no-ops otherwise.
+PATCH=/usr/local/share/nvidia-1143204/0075-backport-NV_PCI_RESIZE_RESOURCE_HAS_EXCLUDE_BARS_ARG.patch
+
+if grep -q NV_PCI_RESIZE_RESOURCE_HAS_EXCLUDE_BARS_ARG nvidia/nv-pci.c 2>/dev/null; then
+    echo "nvidia-1143204: source already has the fix, skipping"
+    exit 0
+fi
+if patch -p1 --dry-run -s < "$PATCH" >/dev/null 2>&1; then
+    patch -p1 < "$PATCH"
+    echo "nvidia-1143204: patch applied"
+else
+    echo "nvidia-1143204: WARNING patch does not apply; building unpatched" >&2
+fi
+exit 0
